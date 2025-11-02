@@ -77,7 +77,7 @@ I don't know,
 
 - Learn how kernel sound drivers work?
 - Adapt an existing quirk (e.g. `alc287-yoga9-bass-spk-pin`) to make it work?
-- Reverse engineer the Windows driver, record the HDA verbs being sent across I2C, and port that to Linux? [This seems to have worked for 2020 models, and this repo has instructions for how to test HDA verbs, and itd author can probably be pinged to add instructions on how to record them using qemu (see bottom of their README).](https://github.com/thiagotei/linux-realtek-alc287/tree/main/lenovo-legion)
+- Reverse engineer the Windows driver, record the HDA verbs being sent across I2C, and port that to Linux? [This seems to have worked for 2020 models, and this repo has instructions for how to test HDA verbs, and its author can probably be pinged to add instructions on how to record them using qemu (see bottom of their README).](https://github.com/thiagotei/linux-realtek-alc287/tree/main/lenovo-legion)
 - Nag?
 
 ## Offer: I will fund a kernel developer to fix this

@@ -59,12 +59,35 @@ Arranged from most to least useful/likely to lead to progress.
 
 - [Official Lenovo spec sheet](https://psref.lenovo.com/Product/Legion/Legion_Pro_7_16IAX10H?tab=spec)
 
-## Things that likely will lead to a permanent solution
+## Things most likely to work
+
+A kernel audio developer will need to create:
+
+1. **A custom SOF topology file** (e.g., `sof-arl-alc287-aw88399.tplg`) that properly chains:
+   - The HDA codec (ALC287/ALC3306)
+   - The I2C smart amplifiers (AW88399 at addresses 0x34/0x35)
+   - Proper routing and gain staging
+
+2. **A DMI/ACPI quirk** in the kernel that matches your subsystem ID (`17aa:3906` and the other affected models) and tells SOF to use this topology.
+
+3. **Possibly an amplifier initialization sequence** to properly configure the AW88399 chips.
+
+**Why this is likely:** The [kernel bugzilla discussion](https://bugzilla.kernel.org/show_bug.cgi?id=218329) is the right venue, the infrastructure already exists (the `snd_soc_aw88399` driver is loaded), and the exact missing pieces have been identified.
+
+## Things that are not likely to work
+
+**HDA verb sniffing**
+
 [This seems to have worked for 2020 models.](https://github.com/thiagotei/linux-realtek-alc287/tree/main/lenovo-legion) The idea is to use QEMU in order to sniff the HDA verbs from the Windows drivers, and then replicate those on Linux.
 
 [A tutorial on how to use QEMU to sniff verbs is available here](https://github.com/ryanprescott/realtek-verb-tools/wiki/How-to-sniff-verbs-from-a-Windows-sound-driver), but the QEMU fork is ancient and is apparently impossible to compile anymore with modern dependency versions.
 
 Additionally, [here are some debugging tools for testing HDA verbs on Linux](https://github.com/ryanprescott/realtek-verb-tools?tab=readme-ov-file).
+
+**Why this is unlikely to work:**
+- The issue isn't just HDA codec configuration, we need to integrate I2C amplifiers.
+- The AW88399 amps need I2C initialization commands, not just HDA verbs.
+- The QEMU toolchain being unmaintained is a bad sign.
 
 
 ## Things that absolutely do not work

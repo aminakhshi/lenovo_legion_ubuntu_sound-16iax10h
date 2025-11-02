@@ -81,7 +81,8 @@ I don't know,
 
 - Learn how kernel sound drivers work?
 - Adapt an existing quirk (e.g. `alc287-yoga9-bass-spk-pin`) to make it work?
-- Reverse engineer the Windows driver, record the HDA verbs being sent across I2C, and port that to Linux? - Nag?
+- Reverse engineer the Windows driver, record the HDA verbs being sent across I2C, and port that to Linux?
+- Nag?
 
 ## Offer: I will fund a kernel developer to fix this
 

@@ -10,7 +10,7 @@ The internal speakers on my Lenovo Legion Pro 7 16IAX10H (and several other Leno
 
 The following individuals pledge the following amount to the bug bounty, to be paid in full to whoever fixes this bug:
 
-- **$500 USD** pledged by @kaepora (me, organizer of this effort)
+- **$500 USD** pledged by @nadimkobeissi (me, organizer of this effort)
 - **$200 USD** [pledged](https://github.com/nadimkobeissi/16iax10h-linux-sound-saga/issues/1) by @Detritalgeo
 - **$100 USD** [pledged](https://github.com/nadimkobeissi/16iax10h-linux-sound-saga/issues/2) by @cerroverb
 - **? USD** [pledged](https://github.com/nadimkobeissi/16iax10h-linux-sound-saga/issues/4) by @atlasfoo

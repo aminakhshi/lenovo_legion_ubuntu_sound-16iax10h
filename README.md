@@ -2,10 +2,6 @@
 
 We are a bunch of Linux users with the Lenovo Legion Pro 7 (16IAX10H) and we are **sick and tired** of our speakers not working properly. We also suck at writing Linux kernel audio drivers, especially when weird things like "Awinic smart amplifiers" are involved. **If you help us make sure that Linux has support for audio on our laptops, we will send you a lot of money.**
 
-## What is the problem?
-
-The internal speakers on my Lenovo Legion Pro 7 16IAX10H (and several other Lenovo laptops with the Realtek ALC3306 codec) produce extremely low volume audio that sounds tinny and muffled - as if only the tweeters are working, not the woofers.
-
 ## Bug bounty pledges
 
 The following individuals pledge the following amount to the bug bounty, to be paid in full to whoever fixes this bug:
@@ -13,10 +9,14 @@ The following individuals pledge the following amount to the bug bounty, to be p
 - **$500 USD** pledged by @nadimkobeissi (me, organizer of this effort)
 - **$200 USD** [pledged](https://github.com/nadimkobeissi/16iax10h-linux-sound-saga/issues/1) by @Detritalgeo
 - **$100 USD** [pledged](https://github.com/nadimkobeissi/16iax10h-linux-sound-saga/issues/2) by @cerroverb
-- **$30 USD** [pledged](https://github.com/nadimkobeissi/16iax10h-linux-sound-saga/issues/4) by @atlasfoo
 - **$70 USD** pledged by @robot-o 
+- **$30 USD** [pledged](https://github.com/nadimkobeissi/16iax10h-linux-sound-saga/issues/4) by @atlasfoo
 
 **Want to add an amount to the pledge? Please send in a pull request!**
+
+## What is the problem?
+
+The internal speakers on my Lenovo Legion Pro 7 16IAX10H (and several other Lenovo laptops with the Realtek ALC3306 codec) produce extremely low volume audio that sounds tinny and muffled - as if only the tweeters are working, not the woofers.
 
 ### What's actually happening (I think)
 

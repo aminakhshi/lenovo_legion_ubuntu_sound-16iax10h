@@ -55,7 +55,8 @@ sudo cp -f arch/x86/boot/bzImage /boot/vmlinuz-linux-16iax10h-audio
 
 To ensure proper graphics integration, you'll need to install the NVidia DKMS drivers for your custom kernel.
 
-### Arch Linux (Tested)
+<details>
+<summary><h3>Arch Linux (Tested)</h3></summary>
 
 Install the NVidia DKMS package and headers:
 
@@ -74,11 +75,14 @@ sudo dkms install nvidia/580.105.08 --force
 
 You may need to replace `580.105.08` with the actual NVidia driver version.
 
+</details>
+
 ## Step 7: Generate the initramfs
 
 The process differs between distributions, as some use `dracut` while others use `mkinitcpio`. Instructions for common distributions are provided below.
 
-### Arch Linux (Tested)
+<details>
+<summary><h3>Arch Linux (Tested)</h3></summary>
 
 First, create a new preset file for your custom kernel:
 
@@ -121,7 +125,10 @@ Replace `your-root-partition-uuid` with your actual root partition UUID (find it
 
 **Note:** You must include `snd_intel_dspcfg.dsp_driver=3` in your kernel boot parameters.
 
-### Fedora
+</details>
+
+<details>
+<summary><h3>Fedora</h3></summary>
 
 First, generate the initramfs for your custom kernel:
 
@@ -147,6 +154,8 @@ options root=UUID=your-root-partition-uuid rw snd_intel_dspcfg.dsp_driver=3
 Replace `your-root-partition-uuid` with your actual root partition UUID (find it by running `blkid`).
 
 **Note:** You must include `snd_intel_dspcfg.dsp_driver=3` in your kernel boot parameters.
+
+</details>
 
 ## Step 8: Reboot into the Patched Kernel
 

@@ -57,13 +57,13 @@ Configure the rest of the kernel as appropriate for your machine.
 <details>
 <summary><h3>Using your existing system kernel configuration (optional)</h3></summary>
 
-Often this configuration can be accomplished simply by dumping your current sysyrm kernel config into a `.config` file in the root of your Linux kernel source directory: 
+Often this configuration can be accomplished simply by dumping your current system kernel config into a `.config` file in the root of your Linux kernel source directory: 
 
 ```
 cat /proc/config.gz | gunzip > .config
 ```
 
-If configured this way, paste the kernel configuration options above into the end of the `.config`:
+If configured this way, paste the kernel configuration options above into the end of the `.config`. This can be done manually or with a command:
 
 ```
 cat >> .config <<EOF

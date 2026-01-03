@@ -7,7 +7,8 @@ This guide explains how to get audio working correctly on the Lenovo Legion Pro 
 To our surprise, this fix actually fixed audio on more laptops than just the 16IAX10H! List of confirmed compatible devices:
 
 - Lenovo Legion Pro 7i Gen 10 (**16IAX10H**)
-- Lenovo Legion 5i (**[16IRX9](https://github.com/nadimkobeissi/16iax10h-linux-sound-saga/issues/20)**)
+- Lenovo Legion Pro 7 Gen 10 (**[16AFR10H](https://github.com/nadimkobeissi/16iax10h-linux-sound-saga/issues/30)**)
+- Lenovo Legion 5i Gen 9 (**[16IRX9](https://github.com/nadimkobeissi/16iax10h-linux-sound-saga/issues/20)**)
 
 If your laptop has a similar sound architecture and you're running into similar problems, please try this fix and let us know if it works for you too!
 

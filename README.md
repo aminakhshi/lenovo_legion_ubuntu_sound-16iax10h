@@ -1,52 +1,139 @@
-# Guide: Linux Audio on the Lenovo Legion Pro 7i Gen 10 (16IAX10H)
+# Guide: Linux Audio on the Lenovo Legion Pro 7i Gen 10 (16IAX10H) — Ubuntu
 
-This guide explains how to get audio working correctly on the Lenovo Legion Pro 7i Gen 10 (**16IAX10H**). Since this solution is still very new, it will take some time for all components to be properly integrated into the Linux kernel. Until that happens, you can follow the steps below, which have been rigorously tested and are confirmed to work. This guide will be updated for future kernel versions as they are released, until the fix is fully integrated into the kernel.
+This guide explains how to get audio working correctly on the **Lenovo Legion Pro 7i Gen 10 (16IAX10H)** on Ubuntu by patching and building a custom Linux kernel.
 
-## We need someone to take care of upstreaming this
+Because this solution is still very new, it may take some time before all components are fully integrated upstream into the Linux kernel. Until then, the steps below have been **rigorously tested and confirmed to work**. This guide will be updated as future kernel versions are released until the fix is fully upstreamed.
 
-If you have time, please work on upstreaming these changes to the Linux kernel and keep ups posted in your progress. [This comment on the Kernel Bugzilla](https://bugzilla.kernel.org/show_bug.cgi?id=218329#c24) has some pointers.
+---
 
-## Confirmed to work on multiple devices!
+## Help Needed: Upstreaming
 
-To our surprise, this fix actually fixed audio on more laptops than just the 16IAX10H! List of confirmed compatible devices:
+If you have time and kernel experience, please help upstream these changes and keep us posted on your progress.  
+This [Kernel Bugzilla comment](https://bugzilla.kernel.org/show_bug.cgi?id=218329#c24) contains useful pointers.
+
+---
+
+## Confirmed to Work on Multiple Devices
+
+This fix has been confirmed to work on more laptops than just the 16IAX10H:
 
 - Lenovo Legion Pro 7i Gen 10 (**16IAX10H**)
 - Lenovo Legion Pro 7 Gen 10 (**[16AFR10H](https://github.com/nadimkobeissi/16iax10h-linux-sound-saga/issues/30)**)
 - Lenovo Legion 5i Gen 9 (**[16IRX9](https://github.com/nadimkobeissi/16iax10h-linux-sound-saga/issues/20)**)
 
-If your laptop has a similar sound architecture and you're running into similar problems, please try this fix and let us know if it works for you too!
+If your laptop uses a similar sound architecture and exhibits similar issues, please try this fix and report your results.
 
-## Step 1: Install the AW88399 Firmware
+---
 
-Copy the `aw88399_acf.bin` file provided in this repository to `/lib/firmware/aw88399_acf.bin`:
-
-```bash
-cp -f fix/firmware/aw88399_acf.bin /lib/firmware/aw88399_acf.bin
-```
-
-If you prefer to obtain your own copy of this firmware blob, [follow these instructions](https://bugzilla.kernel.org/show_bug.cgi?id=218329#c18).
-
-## Step 2: Download the Linux Kernel Sources
-
-This patch is tested under the following kernel versions. Click the one you desire to download its corresponding source code:
-
- - [Linux 6.18](https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.18.tar.xz) (also verified to work on **6.18.1**, **6.18.2**, **6.18.3**, **6.18.4**, **6.18.5**.).
-
-## Step 3: Patch the Linux Kernel Sources
-
-Copy the `16iax10h-audio-linux-<YOUR_KERNEL_VERSION>.patch` file from this repository's `fix/patches` folder into the root of your Linux kernel source directory. Then run:
+## Step 1: Install Build Dependencies (Ubuntu)
 
 ```bash
-patch -p1 < 16iax10h-audio-linux-<YOUR_KERNEL_VERSION>.patch
+sudo apt update
+sudo apt install -y \
+  build-essential \
+  libncurses-dev \
+  flex \
+  bison \
+  libssl-dev \
+  libelf-dev \
+  dwarves \
+  bc \
+  rsync \
+  dkms \
+  git
+````
+
+---
+
+## Step 2: Clone the Repository
+
+```bash
+git clone https://github.com/nadimkobeissi/16iax10h-linux-sound-saga.git ~/legion
 ```
 
-The patch should apply successfully to 10 files without any errors.
+---
 
-## Step 4: Configure the Kernel
+## Step 3: Install the AW88399 Firmware
 
-For the fix to work, the following kernel configuration options must be enabled:
+Copy the firmware blob provided in this repository:
+
+```bash
+sudo cp -f ~/legion/fix/firmware/aw88399_acf.bin /lib/firmware/aw88399_acf.bin
+```
+
+If you prefer to extract the firmware yourself, follow
+[these instructions](https://bugzilla.kernel.org/show_bug.cgi?id=218329#c18).
+
+---
+
+## Step 4: Download the Linux Kernel Sources
+
+This fix has been tested with:
+
+* **Linux 6.18**
+* Also verified on **6.18.1 – 6.18.5**
+
+```bash
+wget https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.18.tar.xz
+tar -xf linux-6.18.tar.xz
+cd linux-6.18
+```
+
+---
+
+## Step 5: Patch the Kernel Sources
+
+Copy the patch matching your kernel version into the kernel source root and apply it:
+
+```bash
+cp -f ~/legion/fix/patches/16iax10h-audio-linux-6.18.patch .
+patch -p1 < 16iax10h-audio-linux-6.18.patch
+```
+
+The patch should apply cleanly to **10 files** with no errors.
+
+---
+
+## Step 6: Kernel Configuration
+
+### 6.1 Start From Ubuntu’s Running Kernel Configuration
+
+```bash
+zcat /proc/config.gz > .config
+```
+
+### 6.2 Ensure NVMe Is Built Into the Kernel (Critical for Dual Boot)
+
+If your root filesystem is on NVMe, it **must not be a module**, or early boot will fail.
+
+Verify in `.config`:
+
+```text
+CONFIG_BLK_DEV_NVME=y
+CONFIG_NVME_CORE=y
+```
+
+You can confirm interactively:
+
+```bash
+make menuconfig
+```
+
+Navigate to:
 
 ```
+Device Drivers  --->
+  NVM Express block device support  --->
+    <*> NVM Express block device
+```
+
+---
+
+## Step 7: Enable Required Audio and SOF Options
+
+Ensure the following kernel options are enabled:
+
+```text
 CONFIG_SND_HDA_SCODEC_AW88399=m
 CONFIG_SND_HDA_SCODEC_AW88399_I2C=m
 CONFIG_SND_SOC_AW88399=m
@@ -56,20 +143,9 @@ CONFIG_SND_SOC_SOF_INTEL_MTL=m
 CONFIG_SND_SOC_SOF_INTEL_LNL=m
 ```
 
-Configure the rest of the kernel as appropriate for your machine. 
+### Optional: Append to Existing Config Automatically
 
-<details>
-<summary><h3>Using your existing system kernel configuration (optional)</h3></summary>
-
-Often this configuration can be accomplished simply by dumping your current system kernel config into a `.config` file in the root of your Linux kernel source directory: 
-
-```
-cat /proc/config.gz | gunzip > .config
-```
-
-If configured this way, paste the kernel configuration options above into the end of the `.config`. This can be done manually or with a command:
-
-```
+```bash
 cat >> .config <<EOF
 CONFIG_SND_HDA_SCODEC_AW88399=m
 CONFIG_SND_HDA_SCODEC_AW88399_I2C=m
@@ -80,153 +156,110 @@ CONFIG_SND_SOC_SOF_INTEL_MTL=m
 CONFIG_SND_SOC_SOF_INTEL_LNL=m
 EOF
 ```
-</details>
 
-
-## Step 5: Compile and Install the Kernel
+Then finalize configuration:
 
 ```bash
-make -j24
-make -j24 modules
-sudo make -j24 modules_install
-sudo cp -f arch/x86/boot/bzImage /boot/vmlinuz-linux-16iax10h-audio
+make olddefconfig
 ```
 
-## Step 6: Install NVidia DKMS Drivers
+---
 
-To ensure proper graphics integration, you'll need to install the NVidia DKMS drivers for your custom kernel.
-
-<details>
-<summary><h3>Arch Linux (Tested)</h3></summary>
-
-Install the NVidia DKMS package and headers:
+## Step 8: Compile and Install the Kernel
 
 ```bash
-sudo pacman -S nvidia-open-dkms
+make -j$(nproc)
+make -j$(nproc) modules
+sudo make modules_install
+sudo make install
+sudo update-grub
 ```
 
-The DKMS system will automatically build the NVidia kernel modules for your custom kernel. After installation, reboot to load the new drivers.
+---
 
-In case you later need to recompile and reinstall the driver, use the `dkms` utility:
+## Step 9: Install NVIDIA DKMS Drivers (Ubuntu Only)
+
+If your system uses an NVIDIA GPU, you **must install the NVIDIA DKMS driver** so that kernel modules are rebuilt for your newly compiled custom kernel.
+
+### 9.1 Identify the Recommended Driver
 
 ```bash
-sudo dkms build nvidia/580.105.08 --force
-sudo dkms install nvidia/580.105.08 --force
+ubuntu-drivers devices
 ```
 
-You may need to replace `580.105.08` with the actual NVidia driver version.
+### 9.2 Install the Driver and DKMS Package
 
-</details>
-
-## Step 7: Generate the initramfs
-
-The process differs between distributions, as some use `dracut` while others use `mkinitcpio`. Instructions for common distributions are provided below.
-
-<details>
-<summary><h3>Arch Linux (Tested)</h3></summary>
-
-First, create a new preset file for your custom kernel:
+Example (replace `550` with the recommended version):
 
 ```bash
-sudo cp /etc/mkinitcpio.d/linux.preset /etc/mkinitcpio.d/linux-16iax10h-audio.preset
+sudo apt install nvidia-driver-550 nvidia-dkms-550
 ```
 
-Edit `/etc/mkinitcpio.d/linux-16iax10h-audio.preset` to look like this:
+### 9.3 Verify DKMS Status
 
 ```bash
-# mkinitcpio preset file for the 'linux-16iax10h-audio' package
-
-ALL_kver="/boot/vmlinuz-linux-16iax10h-audio"
-PRESETS=('default')
-default_image="/boot/initramfs-linux-16iax10h-audio.img"
+dkms status
 ```
 
-Then generate the initramfs:
+You should see something like:
+
+```text
+nvidia/550.xx.xx, <kernel-version>, x86_64: installed
+```
+
+### 9.4 (Optional) Force Rebuild if Needed
 
 ```bash
-sudo mkinitcpio -p linux-16iax10h-audio
+sudo dkms autoinstall
 ```
 
-Finally, update your bootloader configuration. For GRUB, run:
+---
+
+## Step 10: Generate the Initramfs (Ubuntu)
 
 ```bash
-sudo grub-mkconfig -o /boot/grub/grub.cfg
+sudo update-initramfs -c -k $(cat include/config/kernel.release)
 ```
 
-For systemd-boot, create a new boot entry in `/boot/loader/entries/arch-16iax10h-audio.conf`:
+Ensure your bootloader includes the following kernel parameter:
 
-```
-title   Arch Linux (16IAX10H Audio)
-linux   /vmlinuz-linux-16iax10h-audio
-initrd  /initramfs-linux-16iax10h-audio.img
-options root=PARTUUID=your-root-partition-uuid rw snd_intel_dspcfg.dsp_driver=3
+```text
+snd_intel_dspcfg.dsp_driver=3
 ```
 
-Replace `your-root-partition-uuid` with your actual root partition UUID (find it by running `blkid`).
+---
 
-**Note:** You must include `snd_intel_dspcfg.dsp_driver=3` in your kernel boot parameters.
-
-</details>
-
-<details>
-<summary><h3>Fedora</h3></summary>
-
-First, generate the initramfs for your custom kernel:
+## Step 11: Reboot Into the Patched Kernel
 
 ```bash
-sudo dracut --force /boot/initramfs-linux-16iax10h-audio.img --kver $(cat include/config/kernel.release)
+uname -a
 ```
 
-Then update your bootloader configuration. For GRUB, run:
+Confirm you are running the newly installed kernel.
+
+---
+
+## Step 12: Install the Patched ALSA UCM2 Configuration
 
 ```bash
-sudo grub2-mkconfig -o /boot/grub2/grub.cfg
+sudo cp -f ~/legion/fix/ucm2/HiFi-analog.conf /usr/share/alsa/ucm2/HDA/HiFi-analog.conf
+sudo cp -f ~/legion/fix/ucm2/HiFi-mic.conf /usr/share/alsa/ucm2/HDA/HiFi-mic.conf
 ```
 
-For systemd-boot, create a new boot entry in `/boot/loader/entries/fedora-16iax10h-audio.conf`:
-
-```
-title   Fedora Linux (16IAX10H Audio)
-linux   /vmlinuz-linux-16iax10h-audio
-initrd  /initramfs-linux-16iax10h-audio.img
-options root=UUID=your-root-partition-uuid rw snd_intel_dspcfg.dsp_driver=3
-```
-
-Replace `your-root-partition-uuid` with your actual root partition UUID (find it by running `blkid`).
-
-**Note:** You must include `snd_intel_dspcfg.dsp_driver=3` in your kernel boot parameters.
-
-</details>
-
-## Step 8: Reboot into the Patched Kernel
-
-Reboot into the patched kernel. After rebooting, run `uname -a` to verify that you're running the correct kernel.
-
-## Step 9: Install the Patched ALSA UCM2 Configuration
-
-This step is necessary for proper volume control.
-
-Copy the files from this repository's `fix/ucm2/` folder to `/usr/share/alsa/ucm2/HDA/`, overwriting the existing files:
-
-```bash
-sudo cp -f fix/ucm2/HiFi-analog.conf /usr/share/alsa/ucm2/HDA/HiFi-analog.conf
-sudo cp -f fix/ucm2/HiFi-mic.conf /usr/share/alsa/ucm2/HDA/HiFi-mic.conf
-```
-
-Then, identify your sound card ID by running:
+Identify your sound card:
 
 ```bash
 alsaucm listcards
 ```
 
-You should get something like this:
+Example output:
 
-```bash
+```text
 0: hw:0
   LENOVO-83F5-LegionPro716IAX10H-LNVNB161216
 ```
 
-Then, run the commands below, If you got `hw:1` above, change `hw:0` to `hw:1` and `-c 0` to `-c 1`:
+Apply the configuration (adjust card index if needed):
 
 ```bash
 alsaucm -c hw:0 reset
@@ -237,30 +270,24 @@ amixer sset -c 0 Headphone 100%
 amixer sset -c 0 Speaker 100%
 ```
 
-**Note:** The last three commands are for speaker calibration, not for setting your volume to maximum. They must be run for the speakers to function properly, but they do not control your actual volume level.
+> **Important:**
+> These `amixer` commands calibrate the speakers.
+> They **do not** set your user volume to maximum.
 
-## Step 10: Enjoy Working Audio!
-
-That's it! Your audio should now work correctly and permanently. This fix will persist across reboots with no additional steps required.
 
 ## Disclaimer
 
-I, Nadim Kobeissi, attest that all components of the fix provided here have been tested and work without any apparent harmful effects. The fix components are provided in good faith. However, I (as well as the main fix authors) disclaim all responsibility for any use of this fix and guide:
+THE PROGRAM IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. USE AT YOUR OWN RISK.
 
-```
-THE PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU. SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
-```
+---
 
 ## Credits
 
-Fixing this issue required weeks of intensive work from multiple people.
+* **Lyapsus** — ~95% of the kernel engineering work (primary author)
+* **Nadim Kobeissi** — investigation, debugging, testing, documentation
+* **Gergo K.** — firmware extraction methodology
+* **Richard Garber** — internal microphone fix
+* Everyone who pledged support — the reward goes to Lyapsus
 
-Approximately 95% of the engineering work was done by [Lyapsus](https://github.com/Lyapsus). Lyapsus improved an incomplete kernel driver, wrote new kernel codecs and side-codecs, and contributed much more. I want to emphasize his incredible kindness and dedication to solving this issue. He is the primary force behind this fix, and without him, it would never have been possible.
-
-I ([Nadim Kobeissi](https://nadim.computer)) conducted the initial investigation that identified the missing components needed for audio to work on the 16IAX10H on Linux. Building on what I learned from Lyapsus's work, I helped debug and clean up his kernel code, tested it, and made minor improvements. I also contributed the solution to the volume control issue documented in Step 8, and wrote this guide.
-
-Gergo K. showed me how to extract the AW88399 firmware from the Windows driver package and install it on Linux, as documented in Step 1.
-
-[Richard Garber](https://github.com/rgarber11) graciously contributed [the fix](https://github.com/nadimkobeissi/16iax10h-linux-sound-saga/issues/19#issuecomment-3594367397) for making the internal microphone work.
-
-Sincere thanks to everyone who [pledged](PLEDGE.md) a reward for solving this problem. The reward goes to Lyapsus.
+```
+```
